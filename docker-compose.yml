@@ -1,0 +1,133 @@
+version: '3.8'
+
+services:
+  airflow-scheduler:
+    build:
+      context: .
+      dockerfile: ./infrastructure/airflow/Dockerfile
+    container_name: airflow-scheduler
+    restart: always
+    depends_on:
+      airflow-webserver:
+        condition: service_started
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    environment:
+      TZ: ${AIRFLOW_TIME_ZONE}
+      PYTHONPATH: ${AIRFLOW_PYTHON_PATH}
+      AIRFLOW__CORE__EXECUTOR: ${AIRFLOW__CORE__EXECUTOR}
+      AIRFLOW__CELERY__BROKER_URL: ${AIRFLOW__CELERY__BROKER_URL}
+      AIRFLOW__CELERY__RESULT_BACKEND: ${AIRFLOW__CELERY__RESULT_BACKEND}
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: ${AIRFLOW__DATABASE__SQL_ALCHEMY_CONN}
+      AIRFLOW__LOGGING__BASE_LOG_FOLDER: ${AIRFLOW__LOGGING__BASE_LOG_FOLDER}
+      AIRFLOW__WEBSERVER__SECRET_KEY: ${AIRFLOW_WEBSERVER_SECRET_KEY}
+      AIRFLOW_CONN_PRODUCTS_DB: ${AIRFLOW_CONN_PRODUCTS_DB}
+    networks:
+      - slooze_network
+    volumes:
+      - ./orchastration/dags:/opt/airflow/dags
+    entrypoint: ["airflow", "scheduler"]
+
+  airflow-webserver:
+    build:
+      context: .
+      dockerfile: ./infrastructure/airflow/Dockerfile
+    container_name: airflow-webserver
+    restart: always
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    environment:
+      TZ: ${AIRFLOW_TIME_ZONE}
+      PYTHONPATH: ${AIRFLOW_PYTHON_PATH}
+      AIRFLOW__CORE__EXECUTOR: ${AIRFLOW__CORE__EXECUTOR}
+      AIRFLOW__CELERY__BROKER_URL: ${AIRFLOW__CELERY__BROKER_URL}
+      AIRFLOW__CELERY__RESULT_BACKEND: ${AIRFLOW__CELERY__RESULT_BACKEND}
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: ${AIRFLOW__DATABASE__SQL_ALCHEMY_CONN}
+      AIRFLOW__LOGGING__BASE_LOG_FOLDER: ${AIRFLOW__LOGGING__BASE_LOG_FOLDER}
+      AIRFLOW__LOGGING__REMOTE_LOGGING: 'False'
+      AIRFLOW__WEBSERVER__SECRET_KEY: ${AIRFLOW_WEBSERVER_SECRET_KEY}
+      AIRFLOW_CONN_PRODUCTS_DB: ${AIRFLOW_CONN_PRODUCTS_DB}
+      AIRFLOW_ADMIN_USERNAME: ${AIRFLOW_ADMIN_USERNAME}
+      AIRFLOW_ADMIN_PASSWORD: ${AIRFLOW_ADMIN_PASSWORD}
+      AIRFLOW_ADMIN_FIRST_NAME: ${AIRFLOW_ADMIN_FIRST_NAME}
+      AIRFLOW_ADMIN_LAST_NAME: ${AIRFLOW_ADMIN_LAST_NAME}
+      AIRFLOW_ADMIN_EMAIL: ${AIRFLOW_ADMIN_EMAIL}
+    ports:
+      - "8080:8080"
+    networks:
+      - slooze_network
+    volumes:
+      - ./orchastration/dags:/opt/airflow/dags
+      - ./infrastructure/airflow/entrypoint.sh:/entrypoint.sh
+    entrypoint: ["/bin/bash", "/entrypoint.sh"]
+
+  airflow-worker:
+    build:
+      context: ./infrastructure/airflow
+      dockerfile: ./Dockerfile
+    container_name: airflow-worker
+    restart: always
+    depends_on:
+      airflow-scheduler:
+        condition: service_started
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    environment:
+      TZ: ${AIRFLOW_TIME_ZONE}
+      PYTHONPATH: ${AIRFLOW_PYTHON_PATH}
+      AIRFLOW__CORE__EXECUTOR: ${AIRFLOW__CORE__EXECUTOR}
+      AIRFLOW__CELERY__BROKER_URL: ${AIRFLOW__CELERY__BROKER_URL}
+      AIRFLOW__CELERY__RESULT_BACKEND: ${AIRFLOW__CELERY__RESULT_BACKEND}
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: ${AIRFLOW__DATABASE__SQL_ALCHEMY_CONN}
+      AIRFLOW__LOGGING__BASE_LOG_FOLDER: ${AIRFLOW__LOGGING__BASE_LOG_FOLDER}
+      AIRFLOW__LOGGING__REMOTE_LOGGING: 'False'
+      AIRFLOW__WEBSERVER__SECRET_KEY: ${AIRFLOW_WEBSERVER_SECRET_KEY}
+      AIRFLOW__WEBSERVER__WEB_SERVER_HOST: "airflow-webserver"
+      AIRFLOW_CONN_PRODUCTS_DB: ${AIRFLOW_CONN_PRODUCTS_DB}
+    ports:
+      - "8793:8793"
+    networks:
+      - slooze_network
+    volumes:
+      - ./orchastration/dags:/opt/airflow/dags
+    entrypoint: ["airflow", "celery", "worker"]
+
+  postgres:
+    image: postgres:17-bookworm
+    container_name: postgres
+    restart: always
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "${POSTGRES_USERNAME}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    environment:
+      POSTGRES_USER: ${POSTGRES_USERNAME}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - ./infrastructure/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"
+    networks:
+      - slooze_network
+
+  redis:
+    image: redis:8.0.1
+    container_name: redis
+    restart: always
+    ports:
+      - "6379:6379"
+    networks:
+      - slooze_network
+
+networks:
+  slooze_network:
+    name: slooze_network
+    driver: bridge
