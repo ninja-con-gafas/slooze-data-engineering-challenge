@@ -34,16 +34,11 @@ function set_default() {
 }
 
 # AIRFLOW configs
-set_default "AIRFLOW__CELERY__BROKER_URL" "redis://redis:6379/0"
-set_default "AIRFLOW__CORE__EXECUTOR" "CeleryExecutor"
-set_default "AIRFLOW__LOGGING__BASE_LOG_FOLDER" "/opt/airflow/logs"
 set_default "AIRFLOW_ADMIN_EMAIL" "admin@example.com"
 set_default "AIRFLOW_ADMIN_FIRST_NAME" "Administrator"
 set_default "AIRFLOW_ADMIN_LAST_NAME" "System"
 set_default "AIRFLOW_ADMIN_PASSWORD" "admin"
 set_default "AIRFLOW_ADMIN_USERNAME" "admin"
-set_default "AIRFLOW_PYTHON_PATH" "/opt/airflow/"
-set_default "AIRFLOW_TIME_ZONE" "Asia/Kolkata"
 set_default "AIRFLOW_WEBSERVER_SECRET_KEY" "airflowsecretkey"
 
 # Postgres configs
