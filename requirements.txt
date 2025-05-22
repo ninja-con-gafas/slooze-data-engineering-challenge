@@ -1,18 +1,5 @@
-# Web Scraping
-scrapy==2.11.0
 beautifulsoup4==4.12.3
-
-# Data Processing
-pyspark==3.5.1
-pandas==2.2.2
-
-# Workflow Orchestration
-apache-airflow==2.9.0
-
-# Database
 psycopg2-binary==2.9.9
-sqlalchemy==2.0.30
-
-# Utilities
-python-dotenv==1.0.1
+pyspark==3.5.1
 requests==2.31.0
+scrapy==2.11.0
