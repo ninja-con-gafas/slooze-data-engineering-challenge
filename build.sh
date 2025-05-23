@@ -33,13 +33,16 @@ function set_default() {
     fi
 }
 
-# AIRFLOW configs
+# Airflow configs
 set_default "AIRFLOW_ADMIN_EMAIL" "admin@example.com"
 set_default "AIRFLOW_ADMIN_FIRST_NAME" "Administrator"
 set_default "AIRFLOW_ADMIN_LAST_NAME" "System"
 set_default "AIRFLOW_ADMIN_PASSWORD" "admin"
 set_default "AIRFLOW_ADMIN_USERNAME" "admin"
 set_default "AIRFLOW_WEBSERVER_SECRET_KEY" "airflowsecretkey"
+
+# Data pipeline configs
+set_default "DATA" "./data"
 
 # Postgres configs
 set_default "POSTGRES_AIRFLOW_DATABASE" "airflow"
