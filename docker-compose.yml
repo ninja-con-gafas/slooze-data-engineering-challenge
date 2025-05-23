@@ -3,8 +3,8 @@ version: '3.8'
 services:
   airflow-scheduler:
     build:
-      context: .
-      dockerfile: ./infrastructure/airflow/Dockerfile
+      context: ./infrastructure/airflow
+      dockerfile: ./Dockerfile
     container_name: airflow-scheduler
     restart: always
     depends_on:
@@ -32,8 +32,8 @@ services:
 
   airflow-webserver:
     build:
-      context: .
-      dockerfile: ./infrastructure/airflow/Dockerfile
+      context: ./infrastructure/airflow
+      dockerfile: ./Dockerfile
     container_name: airflow-webserver
     restart: always
     depends_on:

@@ -2,22 +2,21 @@ from bs4 import BeautifulSoup
 from bs4.element import Tag
 from scrapy import Request, Spider
 from scrapy.http import Response
-from typing import List
+from typing import Dict, Generator, List
 from urllib.parse import urljoin
 
 class IndiaMartCategory(Spider):
     """
     Scrapy Spider to extract subcategories from the goods directory of IndiaMART. 
 
-    Reads category URLs from a text file and scrapes subcategory names and URLs under each category.
+    Reads category URLs from a text file and scrapes `category`, `sub_category`, `sub_category_url` under each category.
 
     Attributes:
-        name (str): Unique spider name used by Scrapy to identify this spider.
         custom_settings (dict): Custom settings including headers and throttle configuration.
+        name (str): Unique spider name used by Scrapy to identify this spider.
         path (str): Path to the file containing target category URLs.
     """
 
-    name = "IndiaMartCategory"
     custom_settings = {
         "DEFAULT_REQUEST_HEADERS": {
             "User-Agent": (
@@ -34,20 +33,21 @@ class IndiaMartCategory(Spider):
         "AUTOTHROTTLE_START_DELAY": 1.0,
         "AUTOTHROTTLE_MAX_DELAY": 5.0
     }
+    name = "IndiaMartCategory"
 
     def __init__(self, path: str = "targets.txt"):
         """
         Initialize the spider with a path to the input file.
 
         Parameters:
-            path (str): Path to the file containing category URLs. Default is "targets.txt".
+            path (str): Path to the file containing category URLs.
         """
 
         self.path = path
 
     def start_requests(self):
         """
-        Reads target category URLs from `targets.txt` and sends Scrapy requests.
+        Reads target category URLs from text file and sends Scrapy requests.
 
         Yields:
             Request: Scrapy Request objects with category URLs and associated metadata.
@@ -64,11 +64,11 @@ class IndiaMartCategory(Spider):
                         dont_filter=True
                     )
         except FileNotFoundError:
-            self.logger.error("targets.txt file not found.")
+            self.logger.error(f"{self.path} file not found.")
 
-    def parse(self, response: Response):
+    def parse(self, response: Response) -> Generator[Dict[str, str], None, None]:
         """
-        Parses subcategory and sub-subcategory data from the IndiaMART directory.
+        Parses subcategory data from the IndiaMART directory.
 
         Parameters:
             response (Response): The response object.

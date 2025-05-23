@@ -10,6 +10,5 @@ RUN apt-get update && apt-get install -y \
 
 USER airflow
 
-RUN pip install --no-cache-dir \
-    psycopg2-binary \
-    pyspark
+COPY ./requirements.txt ./requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
