@@ -14,27 +14,10 @@ class IndiaMartSubCategory(Spider):
 
     Attributes:
         base_url (str): Base URL for the IndiaMART sub-subcategory.
-        custom_settings (dict): Custom settings including headers and throttle configuration.
         name (str): Unique spider name used by Scrapy to identify this spider.
         path (str): Path to the file containing target subcategory URLs.
     """
 
-    custom_settings = {
-        "DEFAULT_REQUEST_HEADERS": {
-            "User-Agent": (
-                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-                "AppleWebKit/537.36 (KHTML, like Gecko) "
-                "Chrome/124.0.0.0 Safari/537.36"
-            ),
-            "Accept-Language": "en-US,en;q=0.9",
-            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
-            "Referer": "https://www.google.com"
-        },
-        "DOWNLOAD_DELAY": 2.0,
-        "AUTOTHROTTLE_ENABLED": True,
-        "AUTOTHROTTLE_START_DELAY": 1.0,
-        "AUTOTHROTTLE_MAX_DELAY": 5.0
-    }
     name = "IndiaMartSubCategory"
 
     def __init__(self, base_url: str = "https://dir.indiamart.com/impcat/", path: str = "targets.txt"):

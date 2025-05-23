@@ -27,7 +27,10 @@ services:
     networks:
       - slooze_network
     volumes:
-      - ./orchastration/dags:/opt/airflow/dags
+      - "${DATA}:/data:rw"
+      - "./IndiaMart:/opt/airflow/Scraper/IndiaMart:ro"
+      - "./orchastration/dags:/opt/airflow/dags:ro"
+      - "./scrapy.cfg:/opt/airflow/Scraper/scrapy.cfg:ro"
     entrypoint: ["airflow", "scheduler"]
 
   airflow-webserver:
@@ -62,8 +65,11 @@ services:
     networks:
       - slooze_network
     volumes:
-      - ./orchastration/dags:/opt/airflow/dags
-      - ./infrastructure/airflow/entrypoint.sh:/entrypoint.sh
+      - "${DATA}:/data:rw"
+      - "./infrastructure/airflow/entrypoint.sh:/entrypoint.sh:ro"
+      - "./IndiaMart:/opt/airflow/Scraper/IndiaMart:ro"
+      - "./orchastration/dags:/opt/airflow/dags:ro"
+      - "./scrapy.cfg:/opt/airflow/Scraper/scrapy.cfg:ro"
     entrypoint: ["/bin/bash", "/entrypoint.sh"]
 
   airflow-worker:
@@ -96,7 +102,10 @@ services:
     networks:
       - slooze_network
     volumes:
-      - ./orchastration/dags:/opt/airflow/dags
+      - "${DATA}:/data:rw"
+      - "./IndiaMart:/opt/airflow/Scraper/IndiaMart:ro"
+      - "./orchastration/dags:/opt/airflow/dags:ro"
+      - "./scrapy.cfg:/opt/airflow/Scraper/scrapy.cfg:ro"
     entrypoint: ["airflow", "celery", "worker"]
 
   postgres:
@@ -112,7 +121,7 @@ services:
       POSTGRES_USER: ${POSTGRES_USERNAME}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
-      - ./infrastructure/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - "./infrastructure/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro"
     ports:
       - "5432:5432"
     networks:
